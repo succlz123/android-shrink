@@ -1,0 +1,59 @@
+## Android Shrink
+
+A library that can shrink Android R classes. Only support for `com.android.tools.build:gradle:3.6.0+`.
+
+> Move the static final int id to the method usage position). 
+
+## Usage
+
+~~~
+    repositories {
+        google()
+        jcenter()
+        maven { url 'https://jitpack.io' }
+    }
+~~~
+
+~~~
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'org.succlz123.shrink:plugin:0.0.1'
+    }
+~~~
+
+~~~
+    apply plugin: 'org.succlz123.shrink'
+~~~
+
+### Keep
+
+~~~
+androidShrink {
+    keepInfo {
+        mipmap {
+            packageName = "org.succlz123.nrouter.app"
+            resName = ["ic_launcher"]
+            resNameReg = ["ic_launcher.*"]
+        }
+        layout {
+            packageName = "org.succlz123.nrouter.app.test"
+            resName = ["activity_second"]
+        }
+        id {
+            packageName = "androidx.fragment"
+            resNameReg = ["accessibility_.*"]
+        }
+    }
+}
+~~~
+
+## Process effect
+
+> Before - 714KB (Debug)
+
+![1](screenshot/1.jpg)
+
+> After - 29KB (Debug)
+
+![2](screenshot/2.jpg)
+
