@@ -2,27 +2,27 @@
 
 A library that can shrink Android R classes. Only support for `com.android.tools.build:gradle:3.6.0+`.
 
-> Move the static final int id to the method usage position). 
+> Move the `static final int id` to the Field usage position. 
 
 ## Usage
 
 ~~~
-    repositories {
-        google()
-        jcenter()
-        maven { url 'https://jitpack.io' }
-    }
+repositories {
+    google()
+    jcenter()
+    maven { url 'https://jitpack.io' }
+}
 ~~~
 
 ~~~
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
-        classpath 'org.succlz123.shrink:plugin:0.0.1'
-    }
+dependencies {
+    classpath 'com.android.tools.build:gradle:4.0.0'
+    classpath 'com.github.succlz123:android-shrink:0.0.2'
+}
 ~~~
 
 ~~~
-    apply plugin: 'org.succlz123.shrink'
+apply plugin: 'org.succlz123.shrink'
 ~~~
 
 ### Keep

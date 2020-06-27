@@ -1,4 +1,4 @@
-rootProject.name = 'android-r-shrink'
+rootProject.name = 'android-shrink'
 include ':app'
 include ':app-test'
 include ':plugin'

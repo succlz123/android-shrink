@@ -55,7 +55,7 @@ class RGradlePlugin : Transform(), Plugin<Project> {
         return false
     }
 
-        override fun transform(transformInvocation: TransformInvocation?) {
+    override fun transform(transformInvocation: TransformInvocation?) {
         println("--- $name transform start ---\n")
         val outputProvider =
             transformInvocation?.outputProvider ?: return super.transform(transformInvocation)
@@ -66,11 +66,6 @@ class RGradlePlugin : Transform(), Plugin<Project> {
         val rJar = ArrayList<JarInput>()
         val libJar = ArrayList<JarInput>()
         inputs?.forEach { input ->
-            input.directoryInputs.forEach { directoryInput ->
-                directoryInput.toOutputAndGetDest(
-                    outputProvider
-                )
-            }
             input.jarInputs.forEach { jarInput ->
                 val src = jarInput.file
                 if (src.path.contains("compile_and_runtime_not_namespaced_r_class_jar")) {
@@ -96,12 +91,19 @@ class RGradlePlugin : Transform(), Plugin<Project> {
         println("--- Collect&Remove - collected, rJarSize= ${rJar.size} totalSize = $totalSize collectedSize = $collectedSize keepSize = $keepSize ---")
         println("\n------ Collect&Remove end ------\n")
 
-        println("------ Replace start ------\n")
+        println("------ Replace jar start ------\n")
         for (jarInput in libJar) {
             val dest = jarInput.toOutputAndGetDest(outputProvider)
             processor.debugLog("--- Replace - 1 - from ${jarInput.file.path} --- ")
             processor.debugLog("--- Replace - 1 - goto ${dest.absolutePath} --- ")
-            processor.replaceRInfoFromJar(dest, extension)
+            processor.replaceRInfoFromJar(dest)
+        }
+        println("------ Replace directory start ------\n")
+        inputs?.forEach { input ->
+            input.directoryInputs.forEach { directoryInput ->
+                processor.replaceRInfoFromDirectory(directoryInput.file)
+                directoryInput.toOutputAndGetDest(outputProvider)
+            }
         }
         println("--- Replace - libJarSize = ${libJar.size} ---")
         println("\n------ Replace end ------\n")

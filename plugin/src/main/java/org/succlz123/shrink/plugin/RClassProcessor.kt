@@ -44,16 +44,16 @@ class RClassProcessor(private var debug: Boolean = false) {
             val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES)
             val classVisitor = object : ClassVisitor(Opcodes.ASM5, classWriter) {
                 override fun visitField(
-                    access: Int,
-                    name: String?,
-                    descriptor: String?,
-                    signature: String?,
-                    value: Any?
+                        access: Int,
+                        name: String?,
+                        descriptor: String?,
+                        signature: String?,
+                        value: Any?
                 ): FieldVisitor? {
                     if (value is Int) {
                         val key = "$entryName/$name"
                         if (keeps?.find { it.name == rInnerClassName }
-                                ?.shouldKeep(name) == true) {
+                                        ?.shouldKeep(name) == true) {
                             debugLog("--- Collect&Remove - 3 - keep int - $key --- ")
                             rFieldSize++
                             hasKeep = true
@@ -91,7 +91,7 @@ class RClassProcessor(private var debug: Boolean = false) {
     /**
      * Traverse all classes in the JAR file, replacing all direct references to R.class
      */
-    fun replaceRInfoFromJar(srcJar: File, extension: KeepExtension?) {
+    fun replaceRInfoFromJar(srcJar: File) {
         val newJar = File(srcJar.parentFile, srcJar.name + ".shrink.tmp")
         val jos = JarOutputStream(FileOutputStream(newJar))
 
@@ -119,27 +119,46 @@ class RClassProcessor(private var debug: Boolean = false) {
         debugLog("--- Replace - 3 - rename result = $renameTo --- ")
     }
 
+    fun replaceRInfoFromDirectory(dirInputFile: File) {
+        if (dirInputFile.isDirectory) {
+            for (file in dirInputFile.walk()) {
+                val name = file.name
+                if (name.endsWith(".class")) {
+                    val newFile = File(file.parentFile, "$name.shrink.tmp")
+                    val jos = FileOutputStream(newFile)
+                    var bytes = file.readBytes()
+                    bytes = replaceRInfo(bytes)
+                    jos.write(bytes)
+                    jos.close()
+                    file.delete()
+                    val renameTo = newFile.renameTo(file)
+                    debugLog("--- Replace - 1 - $name ---")
+                }
+            }
+        }
+    }
+
     private fun replaceRInfo(bytes: ByteArray): ByteArray {
         val classReader = ClassReader(bytes)
         val classWriter = ClassWriter(0)
         val classVisitor = object : ClassVisitor(Opcodes.ASM5, classWriter) {
 
             override fun visitMethod(
-                access: Int,
-                name: String?,
-                descriptor: String?,
-                signature: String?,
-                exceptions: Array<out String>?
+                    access: Int,
+                    name: String?,
+                    descriptor: String?,
+                    signature: String?,
+                    exceptions: Array<out String>?
             ): MethodVisitor? {
                 var methodVisitor =
-                    super.visitMethod(access, name, descriptor, signature, exceptions)
+                        super.visitMethod(access, name, descriptor, signature, exceptions)
                 methodVisitor = object : MethodVisitor(Opcodes.ASM5, methodVisitor) {
 
                     override fun visitFieldInsn(
-                        opcode: Int,
-                        owner: String?,
-                        nameInner: String?,
-                        descriptorInner: String?
+                            opcode: Int,
+                            owner: String?,
+                            nameInner: String?,
+                            descriptorInner: String?
                     ) {
                         val key = "$owner.class/$nameInner"
                         val value = rInfoMap[key]
