@@ -2,8 +2,6 @@
 
 A library that can shrink Android R classes. Only support for `com.android.tools.build:gradle:3.6.0+`.
 
-> Move the `static final int id` to the Field usage position. 
-
 ## Usage
 
 ~~~
